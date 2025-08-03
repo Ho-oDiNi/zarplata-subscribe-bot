@@ -37,7 +37,7 @@ async def send_author_notification(bot: Bot, user_id: int, author_name: str, tit
     try:
         message = (
             "📢 Новая статья от автора!\n\n"
-            f"<b>{author_name}</b> опубликовал(a):\n"
+            f"#{author_name.replace(' ', '_')} опубликовал(a):\n"
             f"<b>{title}</b>\n\n"
             f"👉 <a href='{url}'>Читать статью</a>"
         )
