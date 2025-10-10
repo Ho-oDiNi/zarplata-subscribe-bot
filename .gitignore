@@ -1,5 +1,5 @@
-**.db
-**.env
+/utils/database.db
+/config/.env
 **.json
 **__pycache__
 **.log
