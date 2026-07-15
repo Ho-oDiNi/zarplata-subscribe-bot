@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import json  # Добавлен импорт модуля json
+import os
 from aiogram import Bot, Dispatcher, types
 from config.bot_config import API_TOKEN, ADMIN
 from utils.registers import *
@@ -111,8 +112,8 @@ async def run_fastapi():
     """Запуск FastAPI сервера"""
     config = uvicorn.Config(
         app,
-        host="0.0.0.0",
-        port=8000,
+        host=os.getenv("BOT_HOST", "0.0.0.0"),
+        port=int(os.getenv("BOT_PORT", "8000")),
         log_level="info"
     )
     server = uvicorn.Server(config)

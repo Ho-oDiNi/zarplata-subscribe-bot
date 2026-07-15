@@ -1,0 +1,16 @@
+services:
+  bot:
+    build: .
+    image: ${DOCKER_IMAGE:-zarplata-subscribe-bot:latest}
+    container_name: zarplata-subscribe-bot
+    restart: unless-stopped
+    env_file:
+      - ./config/.env
+    environment:
+      BOT_HOST: 0.0.0.0
+      BOT_PORT: 8000
+      DATABASE_PATH: /app/data/database.db
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - ./data:/app/data
