@@ -1,0 +1,65 @@
+name: Деплой на сервер
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Сборка и деплой Docker-контейнера
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Получить код
+        uses: actions/checkout@v4
+
+      - name: Настроить Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Проверить сборку Docker-образа
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: zarplata-subscribe-bot:ci
+
+      - name: Деплой на сервер по SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            APP_DIR="${{ secrets.SERVER_APP_DIR }}"
+            REPOSITORY="${{ github.repository }}"
+
+            if [ ! -d "$APP_DIR/.git" ]; then
+              mkdir -p "$APP_DIR"
+              git clone "https://github.com/$REPOSITORY.git" "$APP_DIR"
+            fi
+
+            cd "$APP_DIR"
+            git fetch --prune origin
+            git checkout "${{ github.ref_name }}"
+            git reset --hard "${{ github.sha }}"
+
+            mkdir -p data config
+
+            if [ ! -f config/.env ]; then
+              printf 'API_TOKEN=%s\nADMIN=%s\n' \
+                "${{ secrets.API_TOKEN }}" \
+                "${{ secrets.ADMIN }}" > config/.env
+            fi
+
+            docker compose up -d --build --remove-orphans
+            docker compose ps
