@@ -43,11 +43,6 @@ jobs:
             APP_DIR="$HOME/www/zarplata-subscribe-bot"
             REPOSITORY="${{ github.repository }}"
 
-            if [ ! -d "$APP_DIR/.git" ]; then
-              mkdir -p "$APP_DIR"
-              git clone "https://github.com/$REPOSITORY.git" "$APP_DIR"
-            fi
-
             cd "$APP_DIR"
             git fetch --prune origin
             git checkout "${{ github.ref_name }}"
