@@ -40,7 +40,7 @@ jobs:
           script: |
             set -euo pipefail
 
-            APP_DIR="${{ secrets.SERVER_APP_DIR }}"
+            APP_DIR="$HOME/www/zarplata-subscribe-bot"
             REPOSITORY="${{ github.repository }}"
 
             if [ ! -d "$APP_DIR/.git" ]; then
@@ -54,12 +54,6 @@ jobs:
             git reset --hard "${{ github.sha }}"
 
             mkdir -p data config
-
-            if [ ! -f config/.env ]; then
-              printf 'API_TOKEN=%s\nADMIN=%s\n' \
-                "${{ secrets.API_TOKEN }}" \
-                "${{ secrets.ADMIN }}" > config/.env
-            fi
 
             docker compose up -d --build --remove-orphans
             docker compose ps
